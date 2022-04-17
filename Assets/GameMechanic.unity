@@ -388,7 +388,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 560e74f54a6b2ec49a538c0fa4ba0fc9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -521,6 +521,12 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 936490501}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1271959771 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 82a2914d8f86c62488456950c8330e38,
+    type: 3}
+  m_PrefabInstance: {fileID: 936490501}
+  m_PrefabAsset: {fileID: 0}
 --- !u!143 &1271959772
 CharacterController:
   m_ObjectHideFlags: 0
@@ -551,6 +557,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10a582ecba10684dbaa2b864a4389e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  walkingSpeed: 6
+  runMultiplier: 3
+  rotationFactorPerframe: 10
+  maxJumpHeight: 15
+  maxJumpTime: 0.7
+  fallMultiplier: 2
 --- !u!1 &1739534789
 GameObject:
   m_ObjectHideFlags: 0
@@ -592,6 +604,7 @@ GameObject:
   - component: {fileID: 2001555407}
   - component: {fileID: 2001555406}
   - component: {fileID: 2001555405}
+  - component: {fileID: 2001555408}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -632,7 +645,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 66
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -657,10 +670,23 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2001555404}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.2419868, y: -0, z: -0, w: 0.9702796}
+  m_LocalPosition: {x: 0, y: 4.84, z: -5.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 28.008001, y: 0, z: 0}
+--- !u!114 &2001555408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001555404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dee1f306e9c3d5f4c8eb49831970638c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _objectToFollow: {fileID: 1271959771}
