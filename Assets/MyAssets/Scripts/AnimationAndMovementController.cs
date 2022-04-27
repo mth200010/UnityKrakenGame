@@ -24,6 +24,7 @@ public class AnimationAndMovementController : MonoBehaviour
     int isRunningHash;
     int isJumpingHash;
     int jumpCount = 0;
+    int jumpCountHash;
             
     Vector2 currentMovementInput;
     Vector3 currentMovement;
@@ -51,6 +52,7 @@ public class AnimationAndMovementController : MonoBehaviour
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
         isJumpingHash = Animator.StringToHash("isJumping");
+        jumpCountHash = Animator.StringToHash("jumpCount");
 
         playerInput.CharacterControls.Move.started += onMovementInput;
         playerInput.CharacterControls.Move.canceled += onMovementInput;
@@ -68,44 +70,61 @@ public class AnimationAndMovementController : MonoBehaviour
         float timeToApex = maxJumpTime / 2;
         gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
+        Debug.Log("initialJumpVelocity = " + gravity);
 
         float secondJumpGravity = (-2 * (maxJumpHeight + 2)) / Mathf.Pow((timeToApex * 1.25f), 2);
         float secondJumpInitialVelocity = (2 * (maxJumpHeight + 2)) / (timeToApex * 1.25f);
+        float thirdJumpGravity = (-2 * (maxJumpHeight + 4)) / Mathf.Pow((timeToApex * 1.5f), 2);
+        float thirdJumpInitialVelocity = (2 * (maxJumpHeight + 4)) / (timeToApex * 1.5f);
 
+        Debug.Log("secondInitialJumpVelocity = " + secondJumpGravity);
+
+       // initialJumpVelocities.Add(0, initialJumpVelocity);
         initialJumpVelocities.Add(1, initialJumpVelocity);
         initialJumpVelocities.Add(2, secondJumpInitialVelocity);
+        initialJumpVelocities.Add(3, thirdJumpInitialVelocity);
 
         jumpGravities.Add(0, gravity);
         jumpGravities.Add(1, gravity);
         jumpGravities.Add(2, secondJumpGravity);
+        jumpGravities.Add(3, thirdJumpGravity);
     }
 
     void handleJump()
-    {
+    {        
         if (!IsJumping && characterController.isGrounded && isJumpPressed)
         {
-            Debug.Log("jump count = " + jumpCount);
-            if (jumpCount < 2 && currentJumpResetRoutine != null)
-            {
-                Debug.Log("Coroutine Stopped");
+            Debug.Log("jumpCount = " + jumpCount);
+            if ( jumpCount < 3 && currentJumpResetRoutine != null)
+            {                
                 StopCoroutine(currentJumpResetRoutine);
-                jumpCount = 0;
+                // jumpCount = 0;
             }
+           /* else
+            {                
+                jumpCount = 0;
+            }*/
+           
             animator.SetBool(isJumpingHash, true);
             isJumpAnimating = true;
             IsJumping = true;
             jumpCount += 1;
+            animator.SetInteger(jumpCountHash, jumpCount);
             currentMovement.y = initialJumpVelocities[jumpCount] * .5f;
             currentRunMovement.y = initialJumpVelocities[jumpCount] * .5f;
-        } else if (!isJumpPressed && IsJumping && characterController.isGrounded)
+            
+        }
+        
+        else if (!isJumpPressed && IsJumping && characterController.isGrounded)
         {
             IsJumping = false;
         }
+        
     }
    
     IEnumerator jumpResetRoutine()
     {
-        yield return new WaitForSeconds(.25f);
+        yield return new WaitForSeconds(.5f);
         jumpCount = 0;
     }
 
@@ -182,6 +201,11 @@ public class AnimationAndMovementController : MonoBehaviour
                 animator.SetBool(isJumpingHash, false);
                 isJumpAnimating = false;
                 currentJumpResetRoutine = StartCoroutine(jumpResetRoutine());
+                if(jumpCount == 3)
+                {
+                    jumpCount = 0;
+                    animator.SetInteger(jumpCountHash, jumpCount);
+                }
             }
             currentMovement.y = groundedGravity;
             currentRunMovement.y = groundedGravity;
