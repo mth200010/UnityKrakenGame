@@ -68,18 +68,24 @@ public class AnimationAndMovementController : MonoBehaviour
     void setupJumpVariables()
     {
         float timeToApex = maxJumpTime / 2;
-        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
+
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);              
+        float secondJumpGravity = (-2 * (maxJumpHeight + 2)) / Mathf.Pow((timeToApex * .75f), 2);
+        float thirdJumpGravity = (-2 * (maxJumpHeight + 4)) / Mathf.Pow((timeToApex * .5f), 2);
+
         initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
-        Debug.Log("initialJumpVelocity = " + gravity);
+        float secondJumpInitialVelocity = (2 * (maxJumpHeight + 2)) / (timeToApex * .75f);        
+        float thirdJumpInitialVelocity = (2 * (maxJumpHeight + 4)) / (timeToApex * .5f);
 
-        float secondJumpGravity = (-2 * (maxJumpHeight + 2)) / Mathf.Pow((timeToApex * 1.25f), 2);
-        float secondJumpInitialVelocity = (2 * (maxJumpHeight + 2)) / (timeToApex * 1.25f);
-        float thirdJumpGravity = (-2 * (maxJumpHeight + 4)) / Mathf.Pow((timeToApex * 1.5f), 2);
-        float thirdJumpInitialVelocity = (2 * (maxJumpHeight + 4)) / (timeToApex * 1.5f);
-
+        Debug.Log("initialGravity = " + gravity);
         Debug.Log("secondInitialJumpVelocity = " + secondJumpGravity);
+        Debug.Log("thirdInitialJumpVelocity = " + thirdJumpGravity);
+        Debug.Log("initialJumoVelocity = " + initialJumpVelocity);
+        Debug.Log("secondJumoVelocity = " + secondJumpInitialVelocity);
+        Debug.Log("thirdJumoVelocity = " + thirdJumpInitialVelocity);
 
-       // initialJumpVelocities.Add(0, initialJumpVelocity);
+        // initialJumpVelocities.Add(0, initialJumpVelocity);
+        //initialJumpVelocities.Add(0, initialJumpVelocity);
         initialJumpVelocities.Add(1, initialJumpVelocity);
         initialJumpVelocities.Add(2, secondJumpInitialVelocity);
         initialJumpVelocities.Add(3, thirdJumpInitialVelocity);
