@@ -133,7 +133,7 @@ public class @PlayerInput : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""5b520453-05e1-455e-aa91-c977cdac08a1"",
                     ""path"": ""<Keyboard>/p"",
-                    ""interactions"": """",
+                    ""interactions"": ""MultiTap"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""GroundPound"",
