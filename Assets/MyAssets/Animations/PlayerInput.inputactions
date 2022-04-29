@@ -28,6 +28,14 @@
                     "expectedControlType": "Button",
                     "processors": "NormalizeVector2",
                     "interactions": ""
+                },
+                {
+                    "name": "GroundPound",
+                    "type": "Button",
+                    "id": "d1c13c0f-b36a-4b0f-97d6-5a1c29da144d",
+                    "expectedControlType": "Button",
+                    "processors": "NormalizeVector2",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -101,10 +109,21 @@
                     "name": "",
                     "id": "abf1738b-a35d-4806-871e-1dcc0a67b8f8",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "MultiTap",
                     "processors": "",
                     "groups": "",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b520453-05e1-455e-aa91-c977cdac08a1",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GroundPound",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
