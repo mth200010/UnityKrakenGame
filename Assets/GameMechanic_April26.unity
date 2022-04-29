@@ -654,9 +654,9 @@ MonoBehaviour:
   walkingSpeed: 6
   runMultiplier: 3
   rotationFactorPerframe: 10
-  maxJumpHeight: 15
-  maxJumpTime: 0.7
-  fallMultiplier: 2
+  maxJumpHeight: 10
+  maxJumpTime: 0.5
+  fallMultiplier: 1.5
 --- !u!1 &1739534789
 GameObject:
   m_ObjectHideFlags: 0
