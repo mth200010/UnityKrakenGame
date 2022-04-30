@@ -23,6 +23,7 @@ public class AnimationAndMovementController : MonoBehaviour
     Dictionary<int, float> jumpGravities = new Dictionary<int, float>();
     Coroutine currentJumpResetRoutine = null;
     Coroutine currentGPResetRoutine = null;
+    Vector3 currentTransform;
 
     int isWalkingHash;
     int isRunningHash;
@@ -34,7 +35,7 @@ public class AnimationAndMovementController : MonoBehaviour
     Vector2 currentMovementInput;
     Vector3 currentMovement;
     Vector3 currentRunMovement;
-    Vector3 currentJumpMovement;
+    Vector3 currentJumpMovement;    
 
     bool isMovementPressed = false;
     bool isRunPressed = false;
@@ -44,7 +45,8 @@ public class AnimationAndMovementController : MonoBehaviour
     bool isJumpAnimating = false;    
     bool isGroundPound = false;
     bool isGroundPoundAnimating = false;
-    bool isGrounded = false;
+    bool isGrounded = true;
+    bool isSpinning = false;
 
     float gravity = -9.8f;
     float currentGravity;
@@ -54,7 +56,7 @@ public class AnimationAndMovementController : MonoBehaviour
    
     // Awake is called earlier than Start in Unity's event cycle
     private void Awake()
-    {
+    {        
         // initially set reference variables
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();       
@@ -103,27 +105,28 @@ public class AnimationAndMovementController : MonoBehaviour
 
 
     void handleGroundPound()
-    {
+    {        
         // activated GP if press P while not grounded
         if (characterController.isGrounded == false && isGroundPoundPressed)
         {
             Debug.Log("GP activated");
-            animator.SetBool(isGroundPoundHash, true);
             isGroundPound = true;
-            isGroundPoundAnimating = true;
-
-            // when grounded, deactivate GP
+            animator.SetBool(isGroundPoundHash, true);            
+            isGroundPoundAnimating = true;           
+            StartCoroutine(groundPoundReset());
         }
-        else if (isGroundPoundPressed && characterController.isGrounded && isGroundPound == false)
+       /* else if (isGroundPound == false && isGroundPoundPressed && characterController.isGrounded)
         {
+            Debug.Log("GP De-activated");
             if (currentGPResetRoutine != null)
             {
                 StopCoroutine(currentGPResetRoutine);
             }
             groundPoundVFX.Stop();
-        }
+        }*/
         else if (characterController.isGrounded && isGroundPoundAnimating)
-        {            
+        {
+            Debug.Log("GP De-activated");
             groundPoundVFX?.Play();            
             animator.SetBool(isGroundPoundHash, false);
             isGroundPound = false;
@@ -150,6 +153,7 @@ public class AnimationAndMovementController : MonoBehaviour
     {        
         if (IsJumping == false && characterController.isGrounded && isJumpPressed)
         {
+            Debug.Log("isJumpPressed");
             cloudJumpVFX.enabled = true;
             if ( jumpCount < 3 && currentJumpResetRoutine != null)
             {                
@@ -184,12 +188,9 @@ public class AnimationAndMovementController : MonoBehaviour
 
     IEnumerator groundPoundReset()
     {
-        Debug.Log("Timer gravity Start" + gravity);
-        Debug.Log("Timer Current gravity Start" + currentGravity);
-        yield return new WaitForSeconds(0.5f);
-        gravity = currentGravity;
-        Debug.Log("Timer gravity End" + gravity);
-        Debug.Log("Timer Current gravity End" + currentGravity);
+        isSpinning = true;
+        yield return new WaitForSeconds(.5f);
+        isSpinning = false;
 
     }
 
@@ -276,18 +277,15 @@ public class AnimationAndMovementController : MonoBehaviour
     void handleGravity()
     {        
         bool isFalling = currentMovement.y <= 0.0f || isJumpPressed == false;
+                
         if (characterController.isGrounded && isGroundPound == false)
         {            
-            if (currentGPResetRoutine != null)
-            {
-                StopCoroutine(currentGPResetRoutine);
-            }
+           
             // set animator here
             if (isJumpAnimating)
             {
                 animator.SetBool(isJumpingHash, false);
-                isJumpAnimating = false;
-                currentJumpResetRoutine = StartCoroutine(jumpResetRoutine());
+                isJumpAnimating = false;               
                 if(jumpCount == 3)
                 {
                     jumpCount = 0;
@@ -306,26 +304,20 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
         }
-        else if (characterController.isGrounded == false && isGroundPound)
-        {           
-            // turn off Gravity            
-            float groundPoundGravity = 0.0f;
-            // spin animation is in handleAnimation
-            currentGravity = gravity;
-            gravity = groundPoundGravity;
-            currentGPResetRoutine = StartCoroutine(groundPoundReset());
-            StartCoroutine(groundPoundReset());
-            // turn Gravity back on
-            
-            // set higher fallMultiplier to increase dropping down speed
+        else if (characterController.isGrounded == false && isGroundPound && isSpinning == true)
+        {
+            Debug.Log("Pausing");
+            currentTransform = GetComponent<Transform>().position;
+            currentMovement.y = currentTransform.y - (currentTransform.y * .8f); 
+        } 
+        else if (characterController.isGrounded == false  && isSpinning == false && isGroundPound)
+        {
+            Debug.Log("Un-Pausing");            
             float previousYVelocity = currentMovement.y;
             float newYVelocity = currentMovement.y + (jumpGravities[jumpCount] * groundPoundMultiplier * Time.deltaTime);
             float nextYVelocity = Mathf.Max((previousYVelocity + newYVelocity) * 0.5f, -100.0f);
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
-
-            
-
         }
         else
         {
@@ -340,7 +332,7 @@ public class AnimationAndMovementController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        isGrounded = characterController.SimpleMove(currentMovement);
+        //isGrounded = characterController.SimpleMove(currentMovement);
        
         handleRotation();
         handleAnimation();
@@ -356,7 +348,8 @@ public class AnimationAndMovementController : MonoBehaviour
 
         handleGravity();
         handleJump();
-        handleGroundPound();                
+        handleGroundPound();
+        
     }
 
    
