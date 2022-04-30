@@ -12,6 +12,7 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] float maxJumpTime = 0.5f;
     [SerializeField] float fallMultiplier = 2.0f;
     [SerializeField] float groundPoundMultiplier = 3.0f;
+    [SerializeField] ParticleSystem groundPoundVFX = null;
 
 
     PlayerInput playerInput;
@@ -42,10 +43,11 @@ public class AnimationAndMovementController : MonoBehaviour
     bool isJumpAnimating = false;    
     bool isGroundPound = false;
     bool isGroundPoundAnimating = false;
+    bool isGrounded = false;
 
     float gravity = -9.8f;
     float currentGravity;
-    float groundedGravity = -.05f;   
+    float groundedGravity = -5f;   
     float initialJumpVelocity;        
      
    
@@ -97,33 +99,51 @@ public class AnimationAndMovementController : MonoBehaviour
         jumpGravities.Add(2, secondJumpGravity);
         jumpGravities.Add(3, thirdJumpGravity);
     }
-        
+
 
     void handleGroundPound()
     {
         // activated GP if press P while not grounded
-        if ((characterController.isGrounded && isGroundPound) == false && isGroundPoundPressed)
-        {            
+        if (characterController.isGrounded == false && isGroundPoundPressed)
+        {
+            Debug.Log("GP activated");
             animator.SetBool(isGroundPoundHash, true);
-            isGroundPound = true;            
-            isGroundPoundAnimating = true;                                  
+            isGroundPound = true;
+            isGroundPoundAnimating = true;
 
             // when grounded, deactivate GP
         }
-        else if (isGroundPoundPressed == false && characterController.isGrounded
-                && isGroundPoundAnimating)
+        else if (isGroundPoundPressed && characterController.isGrounded && isGroundPound == false)
         {
-            StopCoroutine(currentGPResetRoutine);
-            animator.SetBool(isGroundPoundHash, false);            
+            if (currentGPResetRoutine != null)
+            {
+                StopCoroutine(currentGPResetRoutine);
+            }
+            groundPoundVFX.Stop();
+        }
+        else if (characterController.isGrounded
+                && isGroundPoundAnimating)
+        {            
+            groundPoundVFX?.Play();            
+            animator.SetBool(isGroundPoundHash, false);
             isGroundPound = false;
             isGroundPoundAnimating = false;
-        }
-        else if (characterController.isGrounded && isGroundPoundPressed)
+            if (currentGPResetRoutine != null)
+            {
+                StopCoroutine(currentGPResetRoutine);
+            }                        
+        }         
+        
+        
+        /*else if (characterController.isGrounded && isGroundPoundPressed)
         {
             isGroundPound = false;
             animator.SetBool(isGroundPoundHash, false);
-            StopCoroutine(currentGPResetRoutine);
-        }
+            if (currentGPResetRoutine != null)
+            { 
+                StopCoroutine(currentGPResetRoutine); 
+            }
+        }*/
     }
 
     void handleJump()
@@ -272,8 +292,8 @@ public class AnimationAndMovementController : MonoBehaviour
                     animator.SetInteger(jumpCountHash, jumpCount);
                 }
             }
-            currentMovement.y = groundedGravity;
-            currentRunMovement.y = groundedGravity;           
+            currentMovement.y = groundedGravity * Time.deltaTime;
+            currentRunMovement.y = groundedGravity * Time.deltaTime;           
         }
         else if (isFalling && isGroundPound == false)
         {
@@ -283,7 +303,7 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
         }
-        else if (isGroundPound && characterController.isGrounded == false)
+        else if (characterController.isGrounded == false && isGroundPound)
         {
             Debug.Log("GP gravity activated");
             // turn off Gravity            
@@ -314,8 +334,9 @@ public class AnimationAndMovementController : MonoBehaviour
 
     }
 
-    private void Update()
-    {       
+    private void FixedUpdate()
+    {
+        isGrounded = characterController.SimpleMove(currentMovement);       
         handleRotation();
         handleAnimation();
        
