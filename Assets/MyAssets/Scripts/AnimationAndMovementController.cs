@@ -13,6 +13,7 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] float fallMultiplier = 2.0f;
     [SerializeField] float groundPoundMultiplier = 3.0f;
     [SerializeField] ParticleSystem groundPoundVFX = null;
+    [SerializeField] TrailRenderer cloudJumpVFX = null;
 
 
     PlayerInput playerInput;
@@ -121,8 +122,7 @@ public class AnimationAndMovementController : MonoBehaviour
             }
             groundPoundVFX.Stop();
         }
-        else if (characterController.isGrounded
-                && isGroundPoundAnimating)
+        else if (characterController.isGrounded && isGroundPoundAnimating)
         {            
             groundPoundVFX?.Play();            
             animator.SetBool(isGroundPoundHash, false);
@@ -149,7 +149,8 @@ public class AnimationAndMovementController : MonoBehaviour
     void handleJump()
     {        
         if (IsJumping == false && characterController.isGrounded && isJumpPressed)
-        {            
+        {
+            cloudJumpVFX.enabled = true;
             if ( jumpCount < 3 && currentJumpResetRoutine != null)
             {                
                 StopCoroutine(currentJumpResetRoutine);                
@@ -169,7 +170,7 @@ public class AnimationAndMovementController : MonoBehaviour
         }
         
         else if (isJumpPressed == false && IsJumping && characterController.isGrounded)
-        {
+        {            
             IsJumping = false;
         }
         
@@ -185,7 +186,7 @@ public class AnimationAndMovementController : MonoBehaviour
     {
         Debug.Log("Timer gravity Start" + gravity);
         Debug.Log("Timer Current gravity Start" + currentGravity);
-        yield return new WaitForSeconds(.75f);
+        yield return new WaitForSeconds(0.5f);
         gravity = currentGravity;
         Debug.Log("Timer gravity End" + gravity);
         Debug.Log("Timer Current gravity End" + currentGravity);
@@ -256,7 +257,8 @@ public class AnimationAndMovementController : MonoBehaviour
         else if ((isMovementPressed == false || isRunPressed == false) && isRunning)
         {
             animator.SetBool(isRunningHash, false);
-        }
+        }               
+       
 
         /*if (isGroundPoundPressed && isGroundPoundAnimating == false 
                 && characterController.isGrounded == false)
@@ -297,6 +299,7 @@ public class AnimationAndMovementController : MonoBehaviour
         }
         else if (isFalling && isGroundPound == false)
         {
+            cloudJumpVFX.enabled = false;
             float previousYVelocity = currentMovement.y;
             float newYVelocity = currentMovement.y + (jumpGravities[jumpCount] * fallMultiplier * Time.deltaTime);
             float nextYVelocity = Mathf.Max((previousYVelocity + newYVelocity) * 0.5f, -100.0f);
@@ -304,13 +307,14 @@ public class AnimationAndMovementController : MonoBehaviour
             currentRunMovement.y = nextYVelocity;
         }
         else if (characterController.isGrounded == false && isGroundPound)
-        {
-            Debug.Log("GP gravity activated");
+        {           
             // turn off Gravity            
             float groundPoundGravity = 0.0f;
             // spin animation is in handleAnimation
             currentGravity = gravity;
             gravity = groundPoundGravity;
+            currentGPResetRoutine = StartCoroutine(groundPoundReset());
+            StartCoroutine(groundPoundReset());
             // turn Gravity back on
             
             // set higher fallMultiplier to increase dropping down speed
@@ -320,7 +324,7 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
 
-            currentGPResetRoutine = StartCoroutine(groundPoundReset());
+            
 
         }
         else
@@ -336,7 +340,8 @@ public class AnimationAndMovementController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        isGrounded = characterController.SimpleMove(currentMovement);       
+        isGrounded = characterController.SimpleMove(currentMovement);
+       
         handleRotation();
         handleAnimation();
        
@@ -353,6 +358,8 @@ public class AnimationAndMovementController : MonoBehaviour
         handleJump();
         handleGroundPound();                
     }
+
+   
     
 
     private void OnEnable()
