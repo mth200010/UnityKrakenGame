@@ -639,11 +639,11 @@ MonoBehaviour:
   groundPoundMultiplier: 3
   groundPoundVFX: {fileID: 1882651894}
   cloudJumpVFX: {fileID: 272260869}
-  jump1SFX: {fileID: 8300000, guid: ee490dc691e75124288fff1895e13d6c, type: 3}
-  jump2SFX: {fileID: 8300000, guid: d39809044092eac4bb1ce670a72b9d3a, type: 3}
-  jump3SFX: {fileID: 8300000, guid: 30410117b9b7a8c4cac6d64d398cb08e, type: 3}
-  groundPoundSFX: {fileID: 8300000, guid: 78a74a43d2bf68f44bdc242b2798e348, type: 3}
-  groundImpactSFX: {fileID: 8300000, guid: 0240a8f8b35a8444888ac518812ed0f1, type: 3}
+  jump1SFX: {fileID: 8300000, guid: abbaeca65d238134c8e8ff19b3c11d7b, type: 3}
+  jump2SFX: {fileID: 8300000, guid: fa2a0b10acc839f4ea61bf333de509f1, type: 3}
+  jump3SFX: {fileID: 8300000, guid: 53cba43ae416b3e4f8fe7ef601f92464, type: 3}
+  groundPoundSFX: {fileID: 8300000, guid: 9ec6bbf6e1933fb4e93975f120adc342, type: 3}
+  groundImpactSFX: {fileID: 8300000, guid: 9047f611f5508b741a9a92fc54c2444d, type: 3}
 --- !u!4 &1273293292 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5379109297952595802, guid: f59a0f98240dd2443828e6a90af1376f,
@@ -5569,13 +5569,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2001555404}
-  m_LocalRotation: {x: 0.15263933, y: -0, z: -0, w: 0.98828197}
-  m_LocalPosition: {x: 0, y: 4.25, z: -7.81}
+  m_LocalRotation: {x: 0.0349675, y: -0, z: -0, w: 0.99938846}
+  m_LocalPosition: {x: 0, y: 4.23, z: -13.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 17.560001, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 4.0080004, y: 0, z: 0}
 --- !u!114 &2001555408
 MonoBehaviour:
   m_ObjectHideFlags: 0
