@@ -14,6 +14,11 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] float groundPoundMultiplier = 3.0f;
     [SerializeField] ParticleSystem groundPoundVFX = null;
     [SerializeField] TrailRenderer cloudJumpVFX = null;
+    [SerializeField] AudioClip jump1SFX = null;
+    [SerializeField] AudioClip jump2SFX = null;
+    [SerializeField] AudioClip jump3SFX = null;
+    [SerializeField] AudioClip groundPoundSFX = null;
+    [SerializeField] AudioClip groundImpactSFX = null;
 
 
     PlayerInput playerInput;
@@ -23,7 +28,11 @@ public class AnimationAndMovementController : MonoBehaviour
     Dictionary<int, float> jumpGravities = new Dictionary<int, float>();
     Coroutine currentJumpResetRoutine = null;
     Coroutine currentGPResetRoutine = null;
-    Vector3 currentTransform;
+    AudioSource jump1SFXisPlaying = null;
+    AudioSource jump2SFXisPlaying = null;
+    AudioSource jump3SFXisPlaying = null;
+
+
 
     int isWalkingHash;
     int isRunningHash;
@@ -35,7 +44,8 @@ public class AnimationAndMovementController : MonoBehaviour
     Vector2 currentMovementInput;
     Vector3 currentMovement;
     Vector3 currentRunMovement;
-    Vector3 currentJumpMovement;    
+    Vector3 currentJumpMovement;
+    Vector3 currentTransform;
 
     bool isMovementPressed = false;
     bool isRunPressed = false;
@@ -47,6 +57,8 @@ public class AnimationAndMovementController : MonoBehaviour
     bool isGroundPoundAnimating = false;
     bool isGrounded = true;
     bool isSpinning = false;
+    bool isPlayingGP_SFX = false;
+    bool isFalling = false;
 
     float gravity = -9.8f;
     float currentGravity;
@@ -105,28 +117,42 @@ public class AnimationAndMovementController : MonoBehaviour
 
 
     void handleGroundPound()
-    {        
+    {
+       
         // activated GP if press P while not grounded
-        if (characterController.isGrounded == false && isGroundPoundPressed)
-        {
-            Debug.Log("GP activated");
+        if (characterController.isGrounded == false && isGroundPoundPressed && IsJumping == true)
+        {           
+            if (isPlayingGP_SFX == false)
+            {
+                if (jump1SFXisPlaying)
+                {
+                    Destroy(jump1SFXisPlaying);
+                }
+                else if (jump2SFXisPlaying)
+                {
+                    Destroy(jump2SFXisPlaying);
+                }
+                else if (jump3SFXisPlaying)
+                {
+                    Destroy(jump3SFXisPlaying);
+                }
+                audioHelper.PlayClip2D(groundPoundSFX, 1);
+                isPlayingGP_SFX = true;
+            }
+            
             isGroundPound = true;
             animator.SetBool(isGroundPoundHash, true);            
             isGroundPoundAnimating = true;           
-            StartCoroutine(groundPoundReset());
-        }
-       /* else if (isGroundPound == false && isGroundPoundPressed && characterController.isGrounded)
-        {
-            Debug.Log("GP De-activated");
-            if (currentGPResetRoutine != null)
-            {
-                StopCoroutine(currentGPResetRoutine);
-            }
-            groundPoundVFX.Stop();
-        }*/
+            StartCoroutine(groundPoundReset());            
+        }                       
         else if (characterController.isGrounded && isGroundPoundAnimating)
         {
-            Debug.Log("GP De-activated");
+            isPlayingGP_SFX = false;
+            AudioSource audioSource = audioHelper.PlayClip2D(groundImpactSFX, 1);
+            if (audioSource == null)
+            {
+                audioHelper.PlayClip2D(groundImpactSFX, 1);
+            }
             groundPoundVFX?.Play();            
             animator.SetBool(isGroundPoundHash, false);
             isGroundPound = false;
@@ -135,25 +161,13 @@ public class AnimationAndMovementController : MonoBehaviour
             {
                 StopCoroutine(currentGPResetRoutine);
             }                        
-        }         
-        
-        
-        /*else if (characterController.isGrounded && isGroundPoundPressed)
-        {
-            isGroundPound = false;
-            animator.SetBool(isGroundPoundHash, false);
-            if (currentGPResetRoutine != null)
-            { 
-                StopCoroutine(currentGPResetRoutine); 
-            }
-        }*/
+        }                 
     }
 
     void handleJump()
     {        
         if (IsJumping == false && characterController.isGrounded && isJumpPressed)
-        {
-            Debug.Log("isJumpPressed");
+        {            
             cloudJumpVFX.enabled = true;
             if ( jumpCount < 3 && currentJumpResetRoutine != null)
             {                
@@ -161,16 +175,27 @@ public class AnimationAndMovementController : MonoBehaviour
             }           
            
             animator.SetBool(isJumpingHash, true);
+
+                       
+            if (jumpCount == 0)
+            {
+                jump1SFXisPlaying = audioHelper.PlayClip2D(jump1SFX, 1);                
+            }
+            else if (jumpCount == 1)
+            {
+                jump2SFXisPlaying = audioHelper.PlayClip2D(jump2SFX, 1);                
+            }
+            else if (jumpCount == 2)
+            {
+                jump3SFXisPlaying = audioHelper.PlayClip2D(jump3SFX, 1);               
+            }
+
             isJumpAnimating = true;
             IsJumping = true;
             jumpCount += 1;
             animator.SetInteger(jumpCountHash, jumpCount);
             currentMovement.y = initialJumpVelocities[jumpCount] * .5f;
-            currentRunMovement.y = initialJumpVelocities[jumpCount] * .5f;            
-
-            // get current jump position
-            // currentJumpMovement.y = currentMovement.y;
-
+            currentRunMovement.y = initialJumpVelocities[jumpCount] * .5f;
         }
         
         else if (isJumpPressed == false && IsJumping && characterController.isGrounded)
@@ -253,7 +278,8 @@ public class AnimationAndMovementController : MonoBehaviour
 
         if ((isMovementPressed && isRunPressed) && isRunning == false)
         {
-            animator.SetBool(isRunningHash, true);
+            animator.SetBool(isRunningHash, true); 
+
         }
         else if ((isMovementPressed == false || isRunPressed == false) && isRunning)
         {
@@ -276,7 +302,7 @@ public class AnimationAndMovementController : MonoBehaviour
 
     void handleGravity()
     {        
-        bool isFalling = currentMovement.y <= 0.0f || isJumpPressed == false;
+        isFalling = currentMovement.y <= 0.0f || isJumpPressed == false;
                 
         if (characterController.isGrounded && isGroundPound == false)
         {            
@@ -295,7 +321,7 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = groundedGravity * Time.deltaTime;
             currentRunMovement.y = groundedGravity * Time.deltaTime;           
         }
-        else if (isFalling && isGroundPound == false)
+        else if (isGroundPound == false && isFalling)
         {
             cloudJumpVFX.enabled = false;
             float previousYVelocity = currentMovement.y;
@@ -305,14 +331,12 @@ public class AnimationAndMovementController : MonoBehaviour
             currentRunMovement.y = nextYVelocity;
         }
         else if (characterController.isGrounded == false && isGroundPound && isSpinning == true)
-        {
-            Debug.Log("Pausing");
+        {            
             currentTransform = GetComponent<Transform>().position;
             currentMovement.y = currentTransform.y - (currentTransform.y * .8f); 
         } 
         else if (characterController.isGrounded == false  && isSpinning == false && isGroundPound)
-        {
-            Debug.Log("Un-Pausing");            
+        {                    
             float previousYVelocity = currentMovement.y;
             float newYVelocity = currentMovement.y + (jumpGravities[jumpCount] * groundPoundMultiplier * Time.deltaTime);
             float nextYVelocity = Mathf.Max((previousYVelocity + newYVelocity) * 0.5f, -100.0f);
