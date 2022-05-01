@@ -7,17 +7,26 @@ public class LevelController : MonoBehaviour
 {
 
     PlayerInput playerInput;
+    bool isQuitPressed;
 
-    private void Start()
+    private void Awake()
     {
         playerInput = new PlayerInput();
+        playerInput.CharacterControls.Jump.started += onQuit;
+        playerInput.CharacterControls.Jump.canceled += onQuit;
+    }
+       
+
+    void onQuit(InputAction.CallbackContext context)
+    {
+        isQuitPressed = context.ReadValueAsButton();
     }
 
     void Update()
-    {
-        
-        if (playerInput.CharacterControls.Quit != null)
+    {        
+        if (isQuitPressed)
         {
+            Debug.Log("Quit");
             Application.Quit();
         }
     }

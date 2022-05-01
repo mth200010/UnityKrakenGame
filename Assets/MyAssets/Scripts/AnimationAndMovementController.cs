@@ -19,7 +19,7 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] AudioClip jump3SFX = null;
     [SerializeField] AudioClip groundPoundSFX = null;
     [SerializeField] AudioClip groundImpactSFX = null;
-
+    [SerializeField] public CameraShake cameraShake = null;
 
     PlayerInput playerInput;
     CharacterController characterController;
@@ -30,9 +30,7 @@ public class AnimationAndMovementController : MonoBehaviour
     Coroutine currentGPResetRoutine = null;
     AudioSource jump1SFXisPlaying = null;
     AudioSource jump2SFXisPlaying = null;
-    AudioSource jump3SFXisPlaying = null;
-
-
+    AudioSource jump3SFXisPlaying = null;    
 
     int isWalkingHash;
     int isRunningHash;
@@ -59,6 +57,7 @@ public class AnimationAndMovementController : MonoBehaviour
     bool isSpinning = false;
     bool isPlayingGP_SFX = false;
     bool isFalling = false;
+    bool isQuitPressed;
 
     float gravity = -9.8f;
     float currentGravity;
@@ -73,6 +72,7 @@ public class AnimationAndMovementController : MonoBehaviour
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();       
         animator = GetComponent<Animator>();
+        //cameraShake = Camera.main.GetComponent<CameraShake>();
 
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
@@ -89,6 +89,8 @@ public class AnimationAndMovementController : MonoBehaviour
         playerInput.CharacterControls.Jump.canceled += onJump;
         playerInput.CharacterControls.GroundPound.started += onGroundPound;
         playerInput.CharacterControls.GroundPound.canceled += onGroundPound;
+        playerInput.CharacterControls.Quit.started += onQuit;
+        playerInput.CharacterControls.Quit.canceled += onQuit;
 
         setupJumpVariables();        
     }
@@ -149,10 +151,18 @@ public class AnimationAndMovementController : MonoBehaviour
         {
             isPlayingGP_SFX = false;
             AudioSource audioSource = audioHelper.PlayClip2D(groundImpactSFX, 1);
-            if (audioSource == null)
-            {
-                audioHelper.PlayClip2D(groundImpactSFX, 1);
+            audioHelper.PlayClip2D(groundImpactSFX, 1);
+            if (audioSource != null)
+            {                
+                Destroy(audioSource);               
             }
+
+            if (cameraShake != null)
+            {
+                Debug.Log("start coroutine");
+                StartCoroutine(cameraShake.Shake(.15f, .20f));
+            }
+
             groundPoundVFX?.Play();            
             animator.SetBool(isGroundPoundHash, false);
             isGroundPound = false;
@@ -169,10 +179,16 @@ public class AnimationAndMovementController : MonoBehaviour
         if (IsJumping == false && characterController.isGrounded && isJumpPressed)
         {            
             cloudJumpVFX.enabled = true;
-            if ( jumpCount < 3 && currentJumpResetRoutine != null)
+
+            if (jumpCount < 3 && currentJumpResetRoutine == null)
+            {
+                currentJumpResetRoutine = StartCoroutine(jumpResetRoutine());
+            }
+            
+           /* if ( jumpCount < 3 && currentJumpResetRoutine != null)
             {                
                 StopCoroutine(currentJumpResetRoutine);                
-            }           
+            }*/           
            
             animator.SetBool(isJumpingHash, true);
 
@@ -190,6 +206,7 @@ public class AnimationAndMovementController : MonoBehaviour
                 jump3SFXisPlaying = audioHelper.PlayClip2D(jump3SFX, 1);               
             }
 
+            
             isJumpAnimating = true;
             IsJumping = true;
             jumpCount += 1;
@@ -206,15 +223,16 @@ public class AnimationAndMovementController : MonoBehaviour
     }
    
     IEnumerator jumpResetRoutine()
-    {
-        yield return new WaitForSeconds(.5f);
+    {        
+        yield return new WaitForSeconds(2f);
         jumpCount = 0;
+        currentJumpResetRoutine = null;       
     }
 
     IEnumerator groundPoundReset()
     {
         isSpinning = true;
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(.5f);                
         isSpinning = false;
 
     }
@@ -242,6 +260,10 @@ public class AnimationAndMovementController : MonoBehaviour
         currentRunMovement.x = currentMovementInput.x * walkingSpeed * runMultiplier;
         currentRunMovement.z = currentMovementInput.y * walkingSpeed * runMultiplier;
         isMovementPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
+    }
+    void onQuit(InputAction.CallbackContext context)
+    {
+        isQuitPressed = context.ReadValueAsButton();
     }
 
     void handleRotation()
@@ -322,7 +344,7 @@ public class AnimationAndMovementController : MonoBehaviour
             currentRunMovement.y = groundedGravity * Time.deltaTime;           
         }
         else if (isGroundPound == false && isFalling)
-        {
+        {            
             cloudJumpVFX.enabled = false;
             float previousYVelocity = currentMovement.y;
             float newYVelocity = currentMovement.y + (jumpGravities[jumpCount] * fallMultiplier * Time.deltaTime);
@@ -373,7 +395,14 @@ public class AnimationAndMovementController : MonoBehaviour
         handleGravity();
         handleJump();
         handleGroundPound();
-        
+
+        if (isQuitPressed)
+        {
+            Debug.Log("Quit");
+            Application.Quit();
+            isQuitPressed = false;
+        }
+
     }
 
    
