@@ -290,7 +290,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &610710905
 GameObject:
@@ -320,6 +320,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 996874106}
+  - {fileID: 792188043}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -428,7 +429,7 @@ GameObject:
   - component: {fileID: 792188041}
   - component: {fileID: 792188040}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -502,12 +503,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 792188039}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.34001482, y: -0.5768224, z: -1.2970965}
   m_LocalScale: {x: 50, y: 50, z: 50}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_Father: {fileID: 610710906}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &941571495
 GameObject:
@@ -569,7 +570,7 @@ PrefabInstance:
     - target: {fileID: 4107484775691271972, guid: f59a0f98240dd2443828e6a90af1376f,
         type: 3}
       propertyPath: m_Name
-      value: jumpBase (1)
+      value: jumpBase
       objectReference: {fileID: 0}
     - target: {fileID: 5379109297952595802, guid: f59a0f98240dd2443828e6a90af1376f,
         type: 3}
@@ -673,13 +674,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10a582ecba10684dbaa2b864a4389e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rotationFactorPerframe: 10
   walkingSpeed: 6
   runMultiplier: 3
-  rotationFactorPerframe: 10
-  maxJumpHeight: 15
-  maxJumpTime: 0.5
   fallMultiplier: 1.5
   groundPoundMultiplier: 3
+  maxJumpHeight: 15
+  maxJumpTime: 0.5
   groundPoundVFX: {fileID: 1882651894}
   cloudJumpVFX: {fileID: 272260869}
   jump1SFX: {fileID: 8300000, guid: abbaeca65d238134c8e8ff19b3c11d7b, type: 3}

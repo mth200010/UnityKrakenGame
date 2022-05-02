@@ -14,8 +14,7 @@ public class LevelController : MonoBehaviour
         playerInput = new PlayerInput();
         playerInput.CharacterControls.Jump.started += onQuit;
         playerInput.CharacterControls.Jump.canceled += onQuit;
-    }
-       
+    }       
 
     void onQuit(InputAction.CallbackContext context)
     {

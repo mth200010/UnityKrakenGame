@@ -5,13 +5,13 @@ using UnityEngine.InputSystem;
 
 public class AnimationAndMovementController : MonoBehaviour
 {
+    [SerializeField] float rotationFactorPerframe = 10.0f;
     [SerializeField] float walkingSpeed = 1.0f;
     [SerializeField] float runMultiplier = 3.0f;
-    [SerializeField] float rotationFactorPerframe = 10.0f;
-    [SerializeField] float maxJumpHeight = 10.0f;
-    [SerializeField] float maxJumpTime = 0.5f;
     [SerializeField] float fallMultiplier = 2.0f;
-    [SerializeField] float groundPoundMultiplier = 3.0f;
+    [SerializeField] float groundPoundMultiplier = 3.0f;    
+    [SerializeField] float maxJumpHeight = 10.0f;
+    [SerializeField] float maxJumpTime = 0.5f;        
     [SerializeField] ParticleSystem groundPoundVFX = null;
     [SerializeField] TrailRenderer cloudJumpVFX = null;
     [SerializeField] AudioClip jump1SFX = null;
@@ -19,7 +19,7 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] AudioClip jump3SFX = null;
     [SerializeField] AudioClip groundPoundSFX = null;
     [SerializeField] AudioClip groundImpactSFX = null;
-    [SerializeField] public CameraShake cameraShake = null;
+    [SerializeField] CameraShake cameraShake = null;
 
     PlayerInput playerInput;
     CharacterController characterController;
@@ -41,8 +41,7 @@ public class AnimationAndMovementController : MonoBehaviour
             
     Vector2 currentMovementInput;
     Vector3 currentMovement;
-    Vector3 currentRunMovement;
-    Vector3 currentJumpMovement;
+    Vector3 currentRunMovement;    
     Vector3 currentTransform;
 
     bool isMovementPressed = false;
@@ -52,27 +51,21 @@ public class AnimationAndMovementController : MonoBehaviour
     bool IsJumping = false;
     bool isJumpAnimating = false;    
     bool isGroundPound = false;
-    bool isGroundPoundAnimating = false;
-    bool isGrounded = true;
+    bool isGroundPoundAnimating = false;  
     bool isSpinning = false;
     bool isPlayingGP_SFX = false;
     bool isFalling = false;
     bool isQuitPressed;
 
-    float gravity = -9.8f;
-    float currentGravity;
+    float gravity = -9.8f;    
     float groundedGravity = -5f;   
     float initialJumpVelocity;        
      
-   
-    // Awake is called earlier than Start in Unity's event cycle
     private void Awake()
-    {        
-        // initially set reference variables
+    {                
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();       
-        animator = GetComponent<Animator>();
-        //cameraShake = Camera.main.GetComponent<CameraShake>();
+        animator = GetComponent<Animator>();        
 
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
@@ -117,10 +110,8 @@ public class AnimationAndMovementController : MonoBehaviour
         jumpGravities.Add(3, thirdJumpGravity);
     }
 
-
     void handleGroundPound()
-    {
-       
+    {       
         // activated GP if press P while not grounded
         if (characterController.isGrounded == false && isGroundPoundPressed && IsJumping == true)
         {           
@@ -138,15 +129,17 @@ public class AnimationAndMovementController : MonoBehaviour
                 {
                     Destroy(jump3SFXisPlaying);
                 }
+
                 audioHelper.PlayClip2D(groundPoundSFX, 1);
                 isPlayingGP_SFX = true;
-            }
+            }     
             
             isGroundPound = true;
             animator.SetBool(isGroundPoundHash, true);            
             isGroundPoundAnimating = true;           
             StartCoroutine(groundPoundReset());            
-        }                       
+        } 
+        // turn off GP when Grounded
         else if (characterController.isGrounded && isGroundPoundAnimating)
         {
             isPlayingGP_SFX = false;
@@ -156,10 +149,8 @@ public class AnimationAndMovementController : MonoBehaviour
             {                
                 Destroy(audioSource);               
             }
-
             if (cameraShake != null)
-            {
-                Debug.Log("start coroutine");
+            {                
                 StartCoroutine(cameraShake.Shake(.15f, .20f));
             }
 
@@ -175,24 +166,19 @@ public class AnimationAndMovementController : MonoBehaviour
     }
 
     void handleJump()
-    {        
+    {   
+        // activate jump when press Spacebar
         if (IsJumping == false && characterController.isGrounded && isJumpPressed)
         {            
-            cloudJumpVFX.enabled = true;
+            cloudJumpVFX.enabled = true;            
 
+            // turn on jump variations Timer
             if (jumpCount < 3 && currentJumpResetRoutine == null)
             {
                 currentJumpResetRoutine = StartCoroutine(jumpResetRoutine());
             }
-            
-           /* if ( jumpCount < 3 && currentJumpResetRoutine != null)
-            {                
-                StopCoroutine(currentJumpResetRoutine);                
-            }*/           
-           
             animator.SetBool(isJumpingHash, true);
-
-                       
+            // SoundFX
             if (jumpCount == 0)
             {
                 jump1SFXisPlaying = audioHelper.PlayClip2D(jump1SFX, 1);                
@@ -204,22 +190,21 @@ public class AnimationAndMovementController : MonoBehaviour
             else if (jumpCount == 2)
             {
                 jump3SFXisPlaying = audioHelper.PlayClip2D(jump3SFX, 1);               
-            }
-
+            }  
             
             isJumpAnimating = true;
             IsJumping = true;
             jumpCount += 1;
+
             animator.SetInteger(jumpCountHash, jumpCount);
+
             currentMovement.y = initialJumpVelocities[jumpCount] * .5f;
             currentRunMovement.y = initialJumpVelocities[jumpCount] * .5f;
-        }
-        
+        }        
         else if (isJumpPressed == false && IsJumping && characterController.isGrounded)
         {            
             IsJumping = false;
-        }
-        
+        }        
     }
    
     IEnumerator jumpResetRoutine()
@@ -234,7 +219,6 @@ public class AnimationAndMovementController : MonoBehaviour
         isSpinning = true;
         yield return new WaitForSeconds(.5f);                
         isSpinning = false;
-
     }
 
     void onGroundPound(InputAction.CallbackContext context)
@@ -252,6 +236,7 @@ public class AnimationAndMovementController : MonoBehaviour
         isRunPressed = context.ReadValueAsButton();
     }
 
+    // normal movement
     void onMovementInput(InputAction.CallbackContext context)
     {
         currentMovementInput = context.ReadValue<Vector2>();
@@ -261,6 +246,7 @@ public class AnimationAndMovementController : MonoBehaviour
         currentRunMovement.z = currentMovementInput.y * walkingSpeed * runMultiplier;
         isMovementPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
     }
+
     void onQuit(InputAction.CallbackContext context)
     {
         isQuitPressed = context.ReadValueAsButton();
@@ -269,21 +255,20 @@ public class AnimationAndMovementController : MonoBehaviour
     void handleRotation()
     {
         Vector3 positionToLookAt;
-        // the change in position our character should point to
+        
         positionToLookAt.x = currentMovement.x;
         positionToLookAt.y = 0.0f;
         positionToLookAt.z = currentMovement.z;
-        // the current rotation of our character
+        
         Quaternion currentRotation = transform.rotation;
-        // create a new rotation based on where the player is currently pressing
+        
        if (isMovementPressed)
         {
             Quaternion targetRotation = Quaternion.LookRotation(positionToLookAt);
             transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationFactorPerframe * Time.deltaTime);
-        }
-        
-    }
-   
+        }        
+    }   
+
     void handleAnimation()
     {
         bool isWalking = animator.GetBool(isWalkingHash);
@@ -307,29 +292,15 @@ public class AnimationAndMovementController : MonoBehaviour
         {
             animator.SetBool(isRunningHash, false);
         }               
-       
-
-        /*if (isGroundPoundPressed && isGroundPoundAnimating == false 
-                && characterController.isGrounded == false)
-        {
-            Debug.Log("GP animation activated");
-            animator.SetBool(isGroundPoundHash, true);
-        }
-        else if (isGroundPoundAnimating && characterController.isGrounded)
-        {
-            Debug.Log("GP animating turned off");
-            animator.SetBool(isGroundPoundHash, false);
-        }*/
     }
 
     void handleGravity()
     {        
         isFalling = currentMovement.y <= 0.0f || isJumpPressed == false;
                 
+        // behaviors when Grounded
         if (characterController.isGrounded && isGroundPound == false)
-        {            
-           
-            // set animator here
+        { 
             if (isJumpAnimating)
             {
                 animator.SetBool(isJumpingHash, false);
@@ -342,21 +313,23 @@ public class AnimationAndMovementController : MonoBehaviour
             }
             currentMovement.y = groundedGravity * Time.deltaTime;
             currentRunMovement.y = groundedGravity * Time.deltaTime;           
-        }
+        }   
+        // normal accelerated falling speed
         else if (isGroundPound == false && isFalling)
-        {            
-            cloudJumpVFX.enabled = false;
+        {
             float previousYVelocity = currentMovement.y;
             float newYVelocity = currentMovement.y + (jumpGravities[jumpCount] * fallMultiplier * Time.deltaTime);
             float nextYVelocity = Mathf.Max((previousYVelocity + newYVelocity) * 0.5f, -100.0f);
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
         }
+        // pause falling when GP is activated
         else if (characterController.isGrounded == false && isGroundPound && isSpinning == true)
         {            
             currentTransform = GetComponent<Transform>().position;
             currentMovement.y = currentTransform.y - (currentTransform.y * .8f); 
-        } 
+        }
+        // falling speed's acceleration is increased while GP
         else if (characterController.isGrounded == false  && isSpinning == false && isGroundPound)
         {                    
             float previousYVelocity = currentMovement.y;
@@ -365,6 +338,7 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
         }
+        // running increased speed
         else
         {
             float previousYVelocity = currentMovement.y;
@@ -373,13 +347,10 @@ public class AnimationAndMovementController : MonoBehaviour
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
         }        
-
     }
 
     private void FixedUpdate()
-    {
-        //isGrounded = characterController.SimpleMove(currentMovement);
-       
+    {        
         handleRotation();
         handleAnimation();
        
@@ -403,9 +374,7 @@ public class AnimationAndMovementController : MonoBehaviour
             isQuitPressed = false;
         }
 
-    }
-
-   
+    }   
     
 
     private void OnEnable()
