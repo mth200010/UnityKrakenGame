@@ -19,6 +19,7 @@ public class AnimationAndMovementController : MonoBehaviour
     [SerializeField] AudioClip jump3SFX = null;
     [SerializeField] AudioClip groundPoundSFX = null;
     [SerializeField] AudioClip groundImpactSFX = null;
+    [SerializeField] AudioClip runningSFX = null;
     [SerializeField] CameraShake cameraShake = null;
 
     PlayerInput playerInput;
@@ -30,7 +31,8 @@ public class AnimationAndMovementController : MonoBehaviour
     Coroutine currentGPResetRoutine = null;
     AudioSource jump1SFXisPlaying = null;
     AudioSource jump2SFXisPlaying = null;
-    AudioSource jump3SFXisPlaying = null;    
+    AudioSource jump3SFXisPlaying = null;
+    AudioSource runningSFXisPlaying = null;   
 
     int isWalkingHash;
     int isRunningHash;
@@ -56,13 +58,14 @@ public class AnimationAndMovementController : MonoBehaviour
     bool isPlayingGP_SFX = false;
     bool isFalling = false;
     bool isQuitPressed;
+    bool isPlayingRunningSFX = false;
 
     float gravity = -9.8f;    
     float groundedGravity = -5f;   
-    float initialJumpVelocity;        
+    float initialJumpVelocity;    
      
     private void Awake()
-    {                
+    {            
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();       
         animator = GetComponent<Animator>();        
@@ -130,8 +133,11 @@ public class AnimationAndMovementController : MonoBehaviour
                     Destroy(jump3SFXisPlaying);
                 }
 
-                audioHelper.PlayClip2D(groundPoundSFX, 1);
-                isPlayingGP_SFX = true;
+                if (jump1SFXisPlaying || jump2SFXisPlaying || jump3SFXisPlaying == null)
+                {
+                    audioHelper.PlayClip2D(groundPoundSFX, 1);
+                    isPlayingGP_SFX = true;
+                }                
             }     
             
             isGroundPound = true;
@@ -144,11 +150,13 @@ public class AnimationAndMovementController : MonoBehaviour
         {
             isPlayingGP_SFX = false;
             AudioSource audioSource = audioHelper.PlayClip2D(groundImpactSFX, 1);
-            audioHelper.PlayClip2D(groundImpactSFX, 1);
+            
             if (audioSource != null)
             {                
                 Destroy(audioSource);               
             }
+            audioHelper.PlayClip2D(groundImpactSFX, 1);
+
             if (cameraShake != null)
             {                
                 StartCoroutine(cameraShake.Shake(.15f, .20f));
@@ -219,6 +227,13 @@ public class AnimationAndMovementController : MonoBehaviour
         isSpinning = true;
         yield return new WaitForSeconds(.5f);                
         isSpinning = false;
+    }
+
+    IEnumerator SFXReset(bool isPlaying, float clipLength)
+    {
+        isPlaying = true;
+        yield return new WaitForSeconds(clipLength);
+        isPlaying = false;
     }
 
     void onGroundPound(InputAction.CallbackContext context)
@@ -322,6 +337,7 @@ public class AnimationAndMovementController : MonoBehaviour
             float nextYVelocity = Mathf.Max((previousYVelocity + newYVelocity) * 0.5f, -100.0f);
             currentMovement.y = nextYVelocity;
             currentRunMovement.y = nextYVelocity;
+            cloudJumpVFX.enabled = false;
         }
         // pause falling when GP is activated
         else if (characterController.isGrounded == false && isGroundPound && isSpinning == true)
@@ -357,10 +373,32 @@ public class AnimationAndMovementController : MonoBehaviour
         if (isRunPressed)
         {
             characterController.Move(currentRunMovement * Time.deltaTime);
+            if (isPlayingRunningSFX == false) 
+            {                
+                if (runningSFXisPlaying == null) 
+                {
+                    if (runningSFX != null)
+                    {
+                        float runningSFXLength = runningSFX.length;
+                        runningSFXisPlaying = audioHelper.PlayClip2D(runningSFX, 1);               
+                        StartCoroutine(SFXReset(isPlayingRunningSFX, runningSFXLength));
+                    }
+                    
+                }
+                
+            }else if (runningSFXisPlaying != null)
+            {                
+                isPlayingRunningSFX = true;
+            }
         }
         else
         {
             characterController.Move(currentMovement * Time.deltaTime);
+            if(runningSFXisPlaying != null)
+            {
+                runningSFXisPlaying.Stop();
+            }            
+            isPlayingRunningSFX = false;                        
         }
 
         handleGravity();

@@ -117,7 +117,7 @@
                     "name": "",
                     "id": "abf1738b-a35d-4806-871e-1dcc0a67b8f8",
                     "path": "<Keyboard>/space",
-                    "interactions": "MultiTap",
+                    "interactions": "MultiTap(tapTime=0.1,tapDelay=0.4,tapCount=100)",
                     "processors": "",
                     "groups": "",
                     "action": "Jump",

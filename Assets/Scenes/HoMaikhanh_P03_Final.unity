@@ -600,7 +600,7 @@ PrefabInstance:
     - target: {fileID: 5379109297952595802, guid: f59a0f98240dd2443828e6a90af1376f,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.61
+      value: 6.24
       objectReference: {fileID: 0}
     - target: {fileID: 5379109297952595802, guid: f59a0f98240dd2443828e6a90af1376f,
         type: 3}
@@ -688,6 +688,7 @@ MonoBehaviour:
   jump3SFX: {fileID: 8300000, guid: 53cba43ae416b3e4f8fe7ef601f92464, type: 3}
   groundPoundSFX: {fileID: 8300000, guid: 9ec6bbf6e1933fb4e93975f120adc342, type: 3}
   groundImpactSFX: {fileID: 8300000, guid: 9047f611f5508b741a9a92fc54c2444d, type: 3}
+  runningSFX: {fileID: 8300000, guid: 2935032f46c00ae40a7dfd154d2e163a, type: 3}
   cameraShake: {fileID: 941571496}
 --- !u!1 &1739534789
 GameObject:
